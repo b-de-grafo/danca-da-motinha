@@ -52,6 +52,33 @@ def passo_multiplo(h, y_seta, y_zero, intervalo, inicializacao):
     return x, y
 
 
+def passo_multiplo(h, y_seta, y_zero, intervalo, inicializacao, n=1):
+    if n == 1:
+        y = [y_zero]
+        x = list(np.arange(intervalo[0], intervalo[1], h))
+
+        y.append(inicializacao(h, y_seta, y_zero, [intervalo[0], intervalo[0] + 2 * h])[1][1])
+
+        for k in range(1, len(x) - 1):
+            y.append(None)
+            y[k + 1] = y[k] + (h / 2) * (3 * y_seta(x[k], y[k]) - y_seta(x[k - 1], y[k - 1]))
+
+        return x, y
+
+    elif n > 1:
+        y = [[y_zero[i] for i in range(n)]]  # [[1000, 300]]
+        x = list(np.arange(intervalo[0], intervalo[1], h))
+
+        y.append(inicializacao(h, y_seta, y_zero, [intervalo[0], intervalo[0] + 2 * h], n=2)[1][1])
+        for k in range(1,len(x) - 1):
+            a = y_seta(x[k], y[k])
+            b = y_seta(x[k-1], y[k-1])
+            y.append([])
+            for i in range(n):
+                y[k + 1].append(None)
+                y[k + 1][i] = y[k][i] + h/2 * (3*a[i]-b[i])
+        return x, y
+
 def y_seta_ex(x, y):
     return -y+x-2
 
@@ -75,19 +102,27 @@ x2, y2 = passo_multiplo(0.1, y_seta_ex, 2, [0, 5], runge_kutta)
 axs.plot(x2, y2, color = "blue")
 """
 
-x, y = runge_kutta(h=0.002, y_seta=lotka_volterra, y_zero=[1000, 300], intervalo=[0, 0.002*100], n=2)
-y = transpoe_matriz(y)
-print(y)
-#print(x1)
-#print(y1)
+x, y_rk = runge_kutta(h=0.002, y_seta=lotka_volterra, y_zero=[1000, 300], intervalo=[0, 0.002*100], n=2)
+print(y_rk)
+x, y_pm = passo_multiplo(h=0.002, y_seta=lotka_volterra, y_zero=[1000, 300], intervalo=[0, 0.002*100], inicializacao=runge_kutta, n=2)
+print(y_pm)
 
-axs[0].plot(x, y[0], color="blue")
-axs[0].plot(x, y[1], color="red")
+y_rk = transpoe_matriz(y_rk)
+print(y_rk)
+
+y_pm = transpoe_matriz(y_pm)
+print(y_pm)
+
+axs[0].plot(x, y_rk[0], color="blue")
+axs[0].plot(x, y_rk[1], color="blue")
+axs[0].plot(x, y_pm[0], color="green")
+axs[0].plot(x, y_pm[1], color="green")
 axs[0].set_ylabel("populção")
 axs[0].set_xlabel("tempo")
 
-axs[1].plot(y[0], y[1], color="blue")
-axs[1].set_ylabel("presa")
-axs[1].set_xlabel("predador")
+axs[1].plot(y_rk[0], y_rk[1], color="blue")
+axs[1].plot(y_pm[0], y_pm[1], color="green")
+axs[1].set_ylabel("predador")
+axs[1].set_xlabel("presa")
 plt.show()
 
