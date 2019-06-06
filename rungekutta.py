@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import random
+
+valor_u = 0.5
+estrada = []
 
 def runge_kutta(h, y_seta, y_zero, intervalo):
     y = [y_zero]
@@ -25,14 +27,16 @@ def runge_kutta(h, y_seta, y_zero, intervalo, n=1):
         x = list(np.arange(intervalo[0], intervalo[1], h))
         b = []
         for k in range(len(x)-1):
-            a = y_seta(x[k], y[k])
+            global estrada
+            estrada.append(uzinho(2000, k))
+            a = y_seta(x[k], y[k], t = k)
             y.append([])
             b.append([])
             for i in range(n):
                 y[k+1].append(None)
                 b[k].append(y[k][i] + h/2 * a[i])
             c = x[k] + h/2
-            d = y_seta(c, b[k])
+            d = y_seta(c, b[k], t = k)
             for i in range(n):
                 y[k + 1][i] = y[k][i] + h * d[i]
 
@@ -87,10 +91,19 @@ def y_seta_ex(x, y):
 def lotka_volterra(x, y, a=100, b=0.37, c=100, d=0.05):
     return (a*y[0] - b*y[0]*y[1], -c*y[1] + d*y[0]*y[1])
 
-#k_1=21000, k_2=1500, m_1=40, m_2=400, b=1500, u=0.2
-def eq_motoca(x, y, k_1=2500, k_2=1500, m_1=800, m_2=400, b=200, u=0.5):
+# k_1=21000, k_2=1500, m_1=40, m_2=400, b=1500, u=0.2
+def uzinho(periodo, t):
+    global valor_u
+    if t % periodo == 0:
+        aux = valor_u
+        valor_u *= -1.0
+        return aux
+    else:
+        return valor_u
+
+def eq_motoca(x, y, k_1=2500, k_2=1500, m_1=800, m_2=400, b=200, u=0.5, t = 0):
     return (y[1],
-            (k_2 * (y[2] - y[0]) + b * (y[3] - y[1]) + k_1 * (u - y[0])) / m_1,
+            (k_2 * (y[2] - y[0]) + b * (y[3] - y[1]) + k_1 * (uzinho(2000, t) - y[0])) / m_1,
             y[3],
             (-k_2 * (y[2] - y[0]) - b * (y[3] - y[2])) / m_2)
 
@@ -137,8 +150,8 @@ axs[1].set_xlabel("presa")
 plt.show()
 """
 
-fig, axs = plt.subplots(1, 1)
-x_rk, y_rk = runge_kutta(h=0.02, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 50], n=4)
+fig, axs = plt.subplots(2, 1)
+x_rk, y_rk = runge_kutta(h=0.02, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 100], n=4)
 print(y_rk)
 x_pm, y_pm = passo_multiplo(h=0.01, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 50], inicializacao=runge_kutta, n=4)
 print(y_pm)
@@ -149,15 +162,16 @@ print(y_rk)
 y_pm = transpoe_matriz(y_pm)
 print(y_pm)
 
-axs.plot(x_rk, y_rk[0], color="blue")
+axs[0].plot(x_rk, y_rk[0], color="blue")
 # axs.plot(x, y_rk[1], color="green")
-axs.plot(x_rk, y_rk[2], color="red")
+axs[0].plot(x_rk, y_rk[2], color="red")
 # axs.plot(x, y_rk[3], color="yellow")
-axs.plot(x_pm, y_pm[0], color="blue")
+#axs.plot(x_pm, y_pm[0], color="blue")
 # axs.plot(x, y_pm[1], color="green")
-axs.plot(x_pm, y_pm[2], color="red")
+#axs.plot(x_pm, y_pm[2], color="red")
 # axs.plot(x, y_pm[3], color="yellow")
-axs.set_xlabel("tempo")
+axs[1].plot(x_rk, estrada, color="yellow")
+axs[1].set_xlabel("tempo")
 
 
 plt.show()
