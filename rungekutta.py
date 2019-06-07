@@ -88,8 +88,8 @@ def y_seta_ex(x, y):
     return -y+x-2
 
 
-def lotka_volterra(x, y, a=100, b=0.37, c=100, d=0.05):
-    return (a*y[0] - b*y[0]*y[1], -c*y[1] + d*y[0]*y[1])
+def lotka_volterra(x, y, params={"a": 100, "b": 0.37, "c": 100, "d": 0.05}):
+    return (params["a"]*y[0] - params["b"]*y[0]*y[1], -params["c"]*y[1] + params["d"]*y[0]*y[1])
 
 # k_1=21000, k_2=1500, m_1=40, m_2=400, b=1500, u=0.2
 def uzinho(periodo, t):
@@ -101,18 +101,18 @@ def uzinho(periodo, t):
     else:
         return valor_u
 
-def eq_motoca(x, y, k_1=2500, k_2=1500, m_1=800, m_2=400, b=200, u=0.5, t = 0):
-    return (y[1],
-            (k_2 * (y[2] - y[0]) + b * (y[3] - y[1]) + k_1 * (uzinho(2000, t) - y[0])) / m_1,
-            y[3],
-            (-k_2 * (y[2] - y[0]) - b * (y[3] - y[2])) / m_2)
+def eq_motoca(x, y, params={"k_1": 2500, "k_2": 1500, "m_1": 800, "m_2": 400, "b": 200, "u": 0.5}, t=0):
+    return (
+        y[1],
+        (params["k_2"] * (y[2] - y[0]) + params["b"] * (y[3] - y[1]) + params["k_1"] * (uzinho(2000, t) - y[0])) / params["m_1"],
+        y[3],
+        (-params["k_2"] * (y[2] - y[0]) - params["b"] * (y[3] - y[2])) / params["m_2"]
+        )
 
 
 def transpoe_matriz(matriz):
     resp = [[matriz[j][i] for j in range(len(matriz))] for i in range(len(matriz[0]))]
     return resp
-
-
 
 
 """
@@ -150,6 +150,7 @@ axs[1].set_xlabel("presa")
 plt.show()
 """
 
+
 fig, axs = plt.subplots(2, 1)
 x_rk, y_rk = runge_kutta(h=0.02, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 100], n=4)
 print(y_rk)
@@ -170,7 +171,7 @@ axs[0].plot(x_rk, y_rk[2], color="red")
 # axs.plot(x, y_pm[1], color="green")
 #axs.plot(x_pm, y_pm[2], color="red")
 # axs.plot(x, y_pm[3], color="yellow")
-axs[1].plot(x_rk, estrada, color="yellow")
+axs[1].plot(x_rk, estrada, color="orange")
 axs[1].set_xlabel("tempo")
 
 
