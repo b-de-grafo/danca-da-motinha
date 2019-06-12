@@ -29,14 +29,14 @@ def runge_kutta(h, y_seta, y_zero, intervalo, n=1):
         for k in range(len(x)-1):
             global estrada
             estrada.append(uzinho(2000, k))
-            a = y_seta(x[k], y[k], t = k)
+            a = y_seta(x[k], y[k], t=k)
             y.append([])
             b.append([])
             for i in range(n):
                 y[k+1].append(None)
                 b[k].append(y[k][i] + h/2 * a[i])
             c = x[k] + h/2
-            d = y_seta(c, b[k], t = k)
+            d = y_seta(c, b[k], t=k)
             for i in range(n):
                 y[k + 1][i] = y[k][i] + h * d[i]
 
@@ -75,8 +75,10 @@ def passo_multiplo(h, y_seta, y_zero, intervalo, inicializacao, n=1):
 
         y.append(inicializacao(h, y_seta, y_zero, [intervalo[0], intervalo[0] + 2 * h], n=n)[1][1])
         for k in range(1,len(x) - 1):
-            a = y_seta(x[k], y[k])
-            b = y_seta(x[k-1], y[k-1])
+            global estrada
+            estrada.append(uzinho(2000, k-1))
+            a = y_seta(x[k], y[k], t=k-1)
+            b = y_seta(x[k-1], y[k-1], t=k-1)
             y.append([])
             for i in range(n):
                 y[k + 1].append(None)
@@ -151,10 +153,10 @@ plt.show()
 """
 
 
-fig, axs = plt.subplots(2, 1)
+fig, axs = plt.subplots(3, 1)
 x_rk, y_rk = runge_kutta(h=0.02, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 100], n=4)
 print(y_rk)
-x_pm, y_pm = passo_multiplo(h=0.01, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 50], inicializacao=runge_kutta, n=4)
+x_pm, y_pm = passo_multiplo(h=0.02, y_seta=eq_motoca, y_zero=[1, 0, 2, 0], intervalo=[0, 100], inicializacao=runge_kutta, n=4)
 print(y_pm)
 
 y_rk = transpoe_matriz(y_rk)
@@ -163,16 +165,18 @@ print(y_rk)
 y_pm = transpoe_matriz(y_pm)
 print(y_pm)
 
-axs[0].plot(x_rk, y_rk[0], color="blue")
+axs[0].plot(x_rk, y_rk[0], color="lightcoral", label='x runge-kutta')
 # axs.plot(x, y_rk[1], color="green")
-axs[0].plot(x_rk, y_rk[2], color="red")
+axs[0].plot(x_rk, y_rk[2], color="maroon", label='y runge-kutta')
 # axs.plot(x, y_rk[3], color="yellow")
-#axs.plot(x_pm, y_pm[0], color="blue")
+axs[1].plot(x_pm, y_pm[0], color="lightgreen", label='x passo múltiplo')
 # axs.plot(x, y_pm[1], color="green")
-#axs.plot(x_pm, y_pm[2], color="red")
+axs[1].plot(x_pm, y_pm[2], color="g", label='y passo múltiplo')
+
 # axs.plot(x, y_pm[3], color="yellow")
-axs[1].plot(x_rk, estrada, color="orange")
-axs[1].set_xlabel("tempo")
+axs[2].plot(x_pm[:4999], estrada[:4999], color="orange")
+axs[2].set_xlabel("tempo")
 
-
+axs[0].legend(loc="upper right")
+axs[1].legend(loc="upper right")
 plt.show()
