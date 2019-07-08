@@ -1,13 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import math
 
 
-def diferencas_finitas_exp(c_quadrado, delta_t, delta_x, intervalo, u_x_zero, cond_contorno, cond_contorno_derivada, iteracoes):
+def diferencas_finitas_exp(c_quadrado, delta_t, delta_x, intervalo, u_x_zero, cond_contorno, cond_contorno_derivada, passos_t):
     gama_quadrado = c_quadrado * (delta_t**2) / (delta_x**2)
-    print(gama_quadrado)
     u = []
 
-    # t = 0
+    # t0
     subu = []
     for x in np.arange(intervalo[0], intervalo[1]+delta_x, delta_x):
         if x == intervalo[0]:
@@ -18,7 +18,9 @@ def diferencas_finitas_exp(c_quadrado, delta_t, delta_x, intervalo, u_x_zero, co
             subu.append(u_x_zero(x, 0))
     u.append(subu)
 
-    # t = 1
+    atualiza_grafico(np.arange(intervalo[0], intervalo[1]+delta_x, delta_x), subu)
+
+    # t1
     subu = []
     i = 0
     for x in np.arange(intervalo[0], intervalo[1]+delta_x, delta_x):
@@ -26,9 +28,11 @@ def diferencas_finitas_exp(c_quadrado, delta_t, delta_x, intervalo, u_x_zero, co
         i = i+1
     u.append(subu)
 
+    atualiza_grafico(np.arange(intervalo[0], intervalo[1]+delta_x, delta_x), subu)
+
     # t > 1
     k = 1
-    for t in np.arange(delta_t * 2, delta_t * iteracoes, delta_t):
+    for t in np.arange(delta_t * 2, delta_t * passos_t, delta_t):
         subu = []
         i = 0
         for x in np.arange(intervalo[0], intervalo[1]+delta_x, delta_x):
@@ -42,7 +46,19 @@ def diferencas_finitas_exp(c_quadrado, delta_t, delta_x, intervalo, u_x_zero, co
             i = i + 1
         u.append(subu)
         k = k + 1
+
+        atualiza_grafico(np.arange(intervalo[0], intervalo[1] + delta_x, delta_x), subu)
     return u
+
+
+def atualiza_grafico(x, u):
+    ax1.clear()
+    ax1.set_ylim(bottom=-1.5, top=1.5)
+    line,  = ax1.plot(x, u)
+    line.set_xdata(x)
+    line.set_ydata(u)
+    plt.draw()
+    plt.pause(0.001)
 
 
 def x_vezes_x_menos_1(x, t):
@@ -61,4 +77,6 @@ def dois(x, t):
     return 2
 
 
-print(diferencas_finitas_exp(4, 0.01, 0.2, [0, 1], x_vezes_x_menos_1, [sen_pi_vezes_t, zero], dois, 10))
+fig = plt.figure()
+ax1 = fig.add_subplot(1, 1, 1)
+print(diferencas_finitas_exp(4, 0.01, 0.2, [0, 1], x_vezes_x_menos_1, [sen_pi_vezes_t, zero], dois, 10000))
